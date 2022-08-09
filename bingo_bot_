@@ -1,0 +1,66 @@
+// ==UserScript==
+// @name         Bingo-Bot
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  For bingo
+// @author       IvanMironov
+// @match        https://www.bing.com/*
+// @match        https://www.avito.ru/*
+// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
+// @grant        none
+// ==/UserScript==
+
+let keywords = ["Авито", "продажа бу", "фмшещ", "телефлон бу"];
+let keyword = keywords[getRandom(0, keywords.length)];
+let links = document.links;
+let bingInput = document.getElementsByName("q")[0];
+let btn = document.getElementsByName("search")[0];
+let page = document.getElementsByClassName("sb_pagS")[0];
+let nextPage = document.getElementsByClassName("sb_pagN")[0];
+
+if (btn !== undefined) {
+  let i = 0;
+  let timerId = setInterval(() => {
+    bingInput.value += keyword[i];
+    i++;
+    if (i == keyword.length) {
+      clearInterval(timerId);
+      btn.click();
+    }
+  }, 250);
+} else if (location.hostname == "www.avito.ru") {
+  setInterval(() => {
+    let index = getRandom(0, links.length);
+
+    if (getRandom(0, 101) >= 85) {
+      location.href = " https://www.bing.com/";
+    } else if (links[index].href.indexOf("www.avito.ru") !== -1) {
+      links[index].click();
+    }
+  }, getRandom(2000, 5000));
+} else {
+  let nextBingPage = true;
+  for (let i = 0; i < links.length; i++) {
+    if (links[i].href.includes("www.avito.ru")) {
+      let link = links[i];
+      nextBingPage = false;
+      setTimeout(() => {
+        link.click();
+      }, getRandom(2000, 5000));
+
+      break;
+    }
+  }
+  if (page.innerText == 5) {
+    nextBingPage = false;
+    location.href = "https://www.bing.com/";
+  }
+  if (nextBingPage) {
+    setTimeout(() => {
+      nextPage.click();
+    }, getRandom(3000, 7000));
+  }
+}
+function getRandom(min, max) {
+  return Math.floor(Math.random() * (max - min) + min);
+}
